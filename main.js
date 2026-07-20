@@ -41,8 +41,8 @@ async function fetchStats() {
 }
 
 function renderHeroStats(totals) {
-  // Multiple elements can share the same data-stat (hero, stat boxes,
-  // and the footer recap line all update together automatically).
+  // 
+  // 
   document.querySelectorAll("[data-stat='players']").forEach((el) =>
     animateValue(el, displayedValues.players, totals.players, (v) => formatNumber(Math.round(v)))
   );
@@ -164,8 +164,8 @@ async function loadAndRender() {
   }
 }
 
-// Fades sections in as they scroll into view. Add class="reveal" to
-// any element in the HTML to opt it into this effect.
+// 
+// 
 function setupScrollReveal() {
   const items = document.querySelectorAll(".reveal");
   if (!items.length) return;
@@ -197,8 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     el.textContent = new Date().getFullYear();
   });
 
-  // Ticks once a second: counts down to the next refresh and keeps
-  // "Updated Ns ago" accurate in between fetches.
+
   setInterval(() => {
     secondsUntilRefresh = Math.max(0, secondsUntilRefresh - 1);
     updateFooterText();
