@@ -1,9 +1,3 @@
-# Bitton Studio — website
-
-A Roblox game studio website modeled on locked.dev's layout, with **real,
-live stats pulled from Roblox** — total visits, players online right now,
-and games live are never typed in by hand, they're fetched automatically
-every 60 seconds.
 
 ## What's in here
 
