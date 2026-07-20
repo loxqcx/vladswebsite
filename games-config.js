@@ -4,8 +4,7 @@
   ============================================================
   This is the only file you need to touch to add, remove, or
   change a game on the site. Live stats (players + visits) are
-  fetched automatically from Roblox using each game's placeId —
-  you never type numbers in by hand.
+  fetched automatically from Roblox using each game's api DONT MESS NOTING UP
 
   For each game, fill in:
 
@@ -22,10 +21,7 @@
     badge       -> Small tag shown on the card (e.g. "Featured",
                    "Acquired", "Partner") — set to "" to hide it
 
-  ⚠️ PLACEHOLDERS: every game below is a placeholder with a fake
-  placeId, so stats will show as "—" until you swap in real
-  Roblox games. To add a game, copy a whole { ... } block below
-  (including the trailing comma) and edit the values.
+  
   ============================================================
 */
 
