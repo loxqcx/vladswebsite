@@ -40,48 +40,39 @@ const GAMES = [
     badge: "Featured"
   },
   {
-    name: "[Placeholder] Tower Climb",
-    description: "Replace this with your game's real name and description.",
-    image: "https://placehold.co/600x338/0c0c0c/9a9a9a?text=Game+Thumbnail",
-    placeId: 0,
-    link: "https://www.roblox.com/",
-    ctaText: "Play Now",
+    name: "☢️ +1 Nuke Per Click",
+    description: "Every click makes your explosion stronger!",
+    image: "https://tr.rbxcdn.com/180DAY-396fb6d6bae3f9248d76c91b8a739480/768/432/Image/Webp/noFilter",
+    placeId: 116067010855801,
+    link: "https://www.roblox.com/games/116067010855801/1-Nuke-Per-Click",
+    ctaText: "Nuke Now",
     badge: "Featured"
   },
   {
-    name: "[Placeholder] Obby World",
-    description: "Replace this with your game's real name and description.",
-    image: "https://placehold.co/600x338/0c0c0c/9a9a9a?text=Game+Thumbnail",
-    placeId: 0,
-    link: "https://www.roblox.com/",
-    ctaText: "Play Now",
-    badge: "Acquired"
-  },
-  {
-    name: "[Placeholder] Brainrot Tycoon",
-    description: "Replace this with your game's real name and description.",
-    image: "https://placehold.co/600x338/0c0c0c/9a9a9a?text=Game+Thumbnail",
-    placeId: 0,
-    link: "https://www.roblox.com/",
-    ctaText: "Play Now",
-    badge: "Partner"
-  },
-  {
-    name: "[Placeholder] Anime Evolve",
-    description: "Replace this with your game's real name and description.",
-    image: "https://placehold.co/600x338/0c0c0c/9a9a9a?text=Game+Thumbnail",
-    placeId: 0,
-    link: "https://www.roblox.com/",
-    ctaText: "Play Now",
+    name: "🦅 +1 Fly Evolve",
+    description: " You train your power to fly! Become the best one there is.",
+    image: "https://tr.rbxcdn.com/180DAY-70155b59c27edabbe377e5ef3610788b/768/432/Image/Webp/noFilter",
+    placeId: 118651055528548,
+    link: "https://www.roblox.com/games/118651055528548/1-Fly-Evolve",
+    ctaText: "Fly Now",
     badge: "Featured"
   },
   {
-    name: "[Placeholder] Duels Arena",
-    description: "Replace this with your game's real name and description.",
-    image: "https://placehold.co/600x338/0c0c0c/9a9a9a?text=Game+Thumbnail",
-    placeId: 0,
-    link: "https://www.roblox.com/",
+    name: "Secure the Supermarket",
+    description: "Secure your supermarket. Make sure no theifes get away.",
+    image: "https://tr.rbxcdn.com/180DAY-780104ba23f04ab2c3fdaf3fde2dd425/768/432/Image/Webp/noFilter",
+    placeId: 107573271137575,
+    link: "https://www.roblox.com/games/107573271137575/Secure-the-Supermarket",
+    ctaText: "Secure Now",
+    badge: "Featured"
+  },
+  {
+    name: "💣 100 Players Bomb Tag",
+    description: "Try to avoid getting the bomb.",
+    image: "https://tr.rbxcdn.com/180DAY-a36e3eaafbb55505fe2776618f7a92a5/768/432/Image/Webp/noFilter",
+    placeId: 120534052146421,
+    link: "https://www.roblox.com/games/120534052146421/100-Players-Bomb-Tag",
     ctaText: "Play Now",
-    badge: "Acquired"
+    badge: "Featured"
   }
 ];
