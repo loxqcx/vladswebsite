@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- CUSTOMIZE: title + description shown in browser tabs / search results / link previews -->
+<title>Bitton Studio | Roblox Game Studio</title>
+<meta name="description" content="Bitton Studio buys, builds, and grows Roblox games. Sell your game outright or partner with us." />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="page-loader" class="page-loader">
+  <!-- CUSTOMIZE: swap this inline SVG for <img src="images/logo.png" class="page-loader__logo"> if you have a real logo file -->
+  <svg class="page-loader__logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <rect width="40" height="40" rx="10" fill="#ffffff"/>
+    <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">B</text>
+  </svg>
+  <div class="page-loader__spinner"></div>
+</div>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/" class="brand">
+      <!-- CUSTOMIZE: swap for <img src="images/logo.png" class="brand__mark"> if you have a real logo file -->
+      <svg class="brand__mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#ffffff"/>
+        <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">B</text>
+      </svg>
+      Bitton Studio
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/games">Games</a></li>
+      <li><a href="/contact" class="btn btn--primary">Get in touch</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+  </div>
+</nav>
+
+<header class="hero" id="home">
+  <div class="container">
+    <!-- CUSTOMIZE: swap for <img src="images/logo.png" class="hero__logo"> if you have a real logo file -->
+    <svg class="hero__logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="10" fill="#ffffff"/>
+      <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">B</text>
+    </svg>
+
+    <span class="eyebrow"><span class="pulse-dot"></span>Live Roblox analytics</span>
+    <!-- CUSTOMIZE: main headline -->
+    <h1>We buy, build, and grow Roblox games.</h1>
+
+    <div class="hero-ctas">
+      <a href="/games" class="btn btn--primary">See our games ↗</a>
+      <a href="/contact" class="btn btn--secondary">Sell or partner with us</a>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-value" data-stat="visits">—</span>
+        <span class="stat-label">Total visits</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-value" data-stat="players">—</span>
+        <span class="stat-label">Playing now</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-value" data-stat="projects">—</span>
+        <span class="stat-label">Games live</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="about" class="reveal">
+  <div class="container">
+    <div class="about-block">
+      <!-- CUSTOMIZE: swap for <img src="images/logo.png" class="about-block__mark"> if you have a real logo file -->
+      <svg class="about-block__mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#ffffff"/>
+        <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">B</text>
+      </svg>
+      <h2>Bitton Studio</h2>
+      <p class="about-block__tagline">Roblox acquisition &amp; production studio</p>
+      <!-- CUSTOMIZE: about copy — replace with your studio's real story -->
+      <p>We work both sides of Roblox game growth: acquiring proven titles and building new ones from scratch. Either way, the goal is the same — keep players coming back.</p>
+      <p>Some creators sell to us outright. Others take investment and keep building alongside our team. For games we build ourselves, we handle everything from prototype to launch.</p>
+      <p>If you've got a game with real players — or an idea worth building — <strong>let's talk about what's next.</strong></p>
+    </div>
+  </div>
+</section>
+
+<section id="featured" class="reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Featured games</span>
+      <h2>Titles we're actively growing.</h2>
+      <p>A rotating look at games in the portfolio, with live stats pulled straight from Roblox.</p>
+    </div>
+  </div>
+  <div class="container">
+    <!-- data-games-marquee limits how many show in the strip (leave off the number attribute value to show all) -->
+    <div class="games-marquee">
+      <div class="games-marquee__track" data-games-marquee="6"></div>
+    </div>
+    <div class="section-cta">
+      <a href="/games" class="btn btn--secondary">View all games →</a>
+    </div>
+  </div>
+</section>
+
+<section id="partner" class="reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">How we partner</span>
+      <h2>A few ways to work together.</h2>
+      <p>Most creators who reach out already have a game with real players — or an idea worth building. Here's how it typically goes.</p>
+    </div>
+    <div class="cards-grid">
+      <!-- CUSTOMIZE: these four cards — wording, order, or add/remove a card -->
+      <div class="info-card">
+        <h3>Sell your game</h3>
+        <p>Built something with real players? We'll buy it outright, price it against your actual stats, and take over operations after close.</p>
+      </div>
+      <div class="info-card">
+        <h3>Build with us</h3>
+        <p>Have an idea but not the team? We can build it from prototype to launch, handling production, art, and systems along the way.</p>
+      </div>
+      <div class="info-card">
+        <h3>Take investment</h3>
+        <p>Not ready to sell? We invest and stay involved — you keep building while we help grow the player base.</p>
+      </div>
+      <div class="info-card">
+        <h3>Clean handoff</h3>
+        <p>Group access, assets, player communications, and the first stretch of live-ops — we manage the transition end to end.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band reveal">
+  <div class="container">
+    <span class="eyebrow">Thinking about selling or partnering?</span>
+    <h2>Let's talk about your game.</h2>
+    <a href="/contact" class="btn btn--primary">Get in touch ↗</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <a href="/" class="brand">
+        <svg class="brand__mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="#ffffff"/>
+          <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">B</text>
+        </svg>
+        Bitton Studio
+      </a>
+      <ul class="footer-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/games">Games</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- CUSTOMIZE: social links — replace # with your real URLs, or delete a line you don't need -->
+    <ul class="footer-social">
+      <li><a href="#" target="_blank" rel="noopener">Roblox Group</a></li>
+      <li><a href="#" target="_blank" rel="noopener">X / Twitter</a></li>
+      <li><a href="#" target="_blank" rel="noopener">Discord</a></li>
+    </ul>
+
+    <p class="footer-stats">
+      <b data-stat="visits">—</b> visits &nbsp;•&nbsp; <b data-stat="players">—</b> playing &nbsp;•&nbsp; <b data-stat="projects">—</b> games
+    </p>
+    <p class="footer-note">© <span data-year>2026</span> Bitton Studio. Not affiliated with Roblox Corporation.</p>
+  </div>
+</footer>
+
+<script src="games-config.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
