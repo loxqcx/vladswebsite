@@ -41,8 +41,8 @@ async function fetchStats() {
 }
 
 function renderHeroStats(totals) {
-  // 
-  // 
+  // Multiple elements can share the same data-stat (hero, stat boxes,
+  // and the footer recap line all update together automatically).
   document.querySelectorAll("[data-stat='players']").forEach((el) =>
     animateValue(el, displayedValues.players, totals.players, (v) => formatNumber(Math.round(v)))
   );
@@ -100,7 +100,15 @@ function renderGameGrid(statsByPlaceId) {
   if (!grid) return;
 
   const limit = Number(grid.dataset.gamesGrid) || null;
-  const games = limit ? GAMES.slice(0, limit) : GAMES;
+  const games = limit ? GAMES.slice(0, limit) : GAMES.slice();
+
+  // Highest CCU (current players) first, lowest last.
+  games.sort((a, b) => {
+    const aPlaying = (statsByPlaceId.get(String(a.placeId)) || {}).playing || 0;
+    const bPlaying = (statsByPlaceId.get(String(b.placeId)) || {}).playing || 0;
+    return bPlaying - aPlaying;
+  });
+
   grid.innerHTML = "";
 
   games.forEach((game) => {
@@ -164,8 +172,8 @@ async function loadAndRender() {
   }
 }
 
-// 
-// 
+// Fades sections in as they scroll into view. Add class="reveal" to
+// any element in the HTML to opt it into this effect.
 function setupScrollReveal() {
   const items = document.querySelectorAll(".reveal");
   if (!items.length) return;
@@ -191,13 +199,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   setTimeout(hidePageLoader, remaining);
 
   setupScrollReveal();
+  initCcuGraphPage();
 
   // Keep the footer year current automatically — never goes stale.
   document.querySelectorAll("[data-year]").forEach((el) => {
     el.textContent = new Date().getFullYear();
   });
 
-
+  // Ticks once a second: counts down to the next refresh and keeps
+  // "Updated Ns ago" accurate in between fetches.
   setInterval(() => {
     secondsUntilRefresh = Math.max(0, secondsUntilRefresh - 1);
     updateFooterText();
@@ -215,3 +225,165 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 });
+
+// ============================================================
+// CCU GRAPH PAGE — only runs on ccu.html (checks for the container
+// first). Fetches daily history from /api/history and draws an
+// animated SVG line chart.
+// ============================================================
+
+function formatChartDate(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function smoothPath(points) {
+  if (points.length < 2) return "";
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i];
+    const p1 = points[i + 1];
+    const midX = (p0.x + p1.x) / 2;
+    const midY = (p0.y + p1.y) / 2;
+    d += ` Q ${p0.x} ${p0.y} ${midX} ${midY}`;
+  }
+  const last = points[points.length - 1];
+  d += ` L ${last.x} ${last.y}`;
+  return d;
+}
+
+function setupCcuTooltip(wrap, points, chartWidth, chartHeight) {
+  const svg = wrap.querySelector(".ccu-chart");
+  const tooltip = wrap.querySelector("[data-ccu-tooltip]");
+  if (!svg || !tooltip) return;
+
+  svg.addEventListener("mousemove", (e) => {
+    const rect = svg.getBoundingClientRect();
+    const scaleX = rect.width / chartWidth;
+    const relX = (e.clientX - rect.left) / scaleX;
+
+    let nearest = points[0];
+    let nearestDist = Infinity;
+    points.forEach((p) => {
+      const dist = Math.abs(p.x - relX);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = p;
+      }
+    });
+
+    tooltip.style.opacity = "1";
+    tooltip.style.left = `${(nearest.x / chartWidth) * 100}%`;
+    tooltip.style.top = `${(nearest.y / chartHeight) * 100}%`;
+    tooltip.textContent = `${formatChartDate(nearest.date)} • ${formatNumber(nearest.players)} playing`;
+  });
+
+  svg.addEventListener("mouseleave", () => {
+    tooltip.style.opacity = "0";
+  });
+}
+
+function renderCcuChart(wrap, history) {
+  const width = 1000;
+  const height = 380;
+  const padLeft = 54;
+  const padRight = 20;
+  const padTop = 24;
+  const padBottom = 40;
+
+  const values = history.map((h) => h.players);
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const range = max - min || 1;
+
+  const plotW = width - padLeft - padRight;
+  const plotH = height - padTop - padBottom;
+
+  const points = history.map((h, i) => {
+    const x = history.length === 1 ? padLeft + plotW / 2 : padLeft + (i / (history.length - 1)) * plotW;
+    const y = padTop + plotH - ((h.players - min) / range) * plotH;
+    return { x, y, date: h.date, players: h.players };
+  });
+
+  const linePath = smoothPath(points);
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${padTop + plotH} L ${points[0].x} ${padTop + plotH} Z`;
+
+  const maxLabels = 7;
+  const labelStep = Math.max(1, Math.ceil(points.length / maxLabels));
+  const dateLabels = points
+    .filter((_, i) => i % labelStep === 0 || i === points.length - 1)
+    .map((p) => `<text x="${p.x}" y="${height - 12}" class="ccu-chart__axis-label" text-anchor="middle">${formatChartDate(p.date)}</text>`)
+    .join("");
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1]
+    .map((t) => {
+      const y = padTop + plotH * t;
+      const val = Math.round(max - t * range);
+      return `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="ccu-chart__grid" /><text x="${padLeft - 10}" y="${y + 4}" class="ccu-chart__axis-label" text-anchor="end">${formatNumber(val)}</text>`;
+    })
+    .join("");
+
+  wrap.innerHTML = `
+    <svg class="ccu-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ccuFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28" />
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      ${gridLines}
+      <path d="${areaPath}" fill="url(#ccuFill)" stroke="none"></path>
+      <path d="${linePath}" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="ccu-chart__line"></path>
+      ${points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="4" class="ccu-chart__dot"></circle>`).join("")}
+      ${dateLabels}
+    </svg>
+    <div class="ccu-chart__tooltip" data-ccu-tooltip></div>
+  `;
+
+  const linePathEl = wrap.querySelector(".ccu-chart__line");
+  const length = linePathEl.getTotalLength();
+  linePathEl.style.strokeDasharray = length;
+  linePathEl.style.strokeDashoffset = length;
+  requestAnimationFrame(() => {
+    linePathEl.style.transition = "stroke-dashoffset 1.4s ease";
+    linePathEl.style.strokeDashoffset = "0";
+  });
+
+  setupCcuTooltip(wrap, points, width, height);
+}
+
+function renderCcuStats(history) {
+  const peak = Math.max(...history.map((h) => h.players));
+  const current = history[history.length - 1].players;
+  const days = history.length;
+
+  const setText = (key, text) => {
+    const el = document.querySelector(`[data-ccu-stat="${key}"]`);
+    if (el) el.textContent = text;
+  };
+  setText("peak", formatNumber(peak));
+  setText("current", formatNumber(current));
+  setText("days", String(days));
+}
+
+function initCcuGraphPage() {
+  const wrap = document.querySelector("[data-ccu-graph]");
+  if (!wrap) return; // not on the CCU graph page, skip entirely
+
+  const placeIds = GAMES.map((g) => g.placeId).join(",");
+
+  fetch(`/api/history?placeIds=${placeIds}`)
+    .then((res) => res.json())
+    .then(({ history }) => {
+      if (!history || history.length === 0) {
+        wrap.innerHTML = `<div class="ccu-chart-empty">No history yet — daily data starts building from today. Check back tomorrow!</div>`;
+        return;
+      }
+      renderCcuChart(wrap, history);
+      renderCcuStats(history);
+    })
+    .catch(() => {
+      wrap.innerHTML = `<div class="ccu-chart-empty">Couldn't load history right now — try refreshing.</div>`;
+    });
+}
