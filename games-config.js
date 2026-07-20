@@ -31,12 +31,12 @@
 
 const GAMES = [
   {
-    name: "[Placeholder] Speed Run Escape",
-    description: "Replace this with your game's real name and description.",
-    image: "https://placehold.co/600x338/0c0c0c/9a9a9a?text=Game+Thumbnail",
-    placeId: 0, // ⚠️ CUSTOMIZE: put your real Roblox placeId here
-    link: "https://www.roblox.com/",
-    ctaText: "Play Now",
+    name: "🍪 Roll Your Cookie",
+    description: "Try to roll your cookie in the milk! avoid posion",
+    image: "https://tr.rbxcdn.com/180DAY-d68646eecac23213e0be3101bcac2242/768/432/Image/Webp/noFilter",
+    placeId: 108632069675268, // ⚠️ CUSTOMIZE: put your real Roblox placeId here
+    link: "https://www.roblox.com/games/108632069675268/Roll-Your-Cookie",
+    ctaText: "Roll Now",
     badge: "Featured"
   },
   {
