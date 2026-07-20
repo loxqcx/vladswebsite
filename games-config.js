@@ -70,5 +70,23 @@ const GAMES = [
     link: "https://www.roblox.com/games/120534052146421/100-Players-Bomb-Tag",
     ctaText: "Play Now",
     badge: "Featured"
+  },
+  {
+    name: "100 Players Car Crash",
+    description: "100 player. lots of bad choices.",
+    image: "https://tr.rbxcdn.com/180DAY-6161a9b22b600ff47cebb0b53e98892a/768/432/Image/Webp/noFilter",
+    placeId: 97683439005414,
+    link: "https://www.roblox.com/games/97683439005414/100-Players-Car-Crash",
+    ctaText: "Crash Now",
+    badge: "Featured"
+  },
+   {
+    name: "Spell or Fall",
+    description: "Spell the word correctly or else you fall and die.",
+    image: "https://tr.rbxcdn.com/180DAY-4da1e8dfea18632eefe08624f27004c2/768/432/Image/Webp/noFilter",
+    placeId: 91739789863159,
+    link: "https://www.roblox.com/games/91739789863159/Spell-or-Fall",
+    ctaText: "Spell Now",
+    badge: "Featured"
   }
 ];
