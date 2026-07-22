@@ -32,7 +32,7 @@ const GAMES = [
     image: "https://tr.rbxcdn.com/180DAY-d68646eecac23213e0be3101bcac2242/768/432/Image/Webp/noFilter",
     placeId: 108632069675268, // ⚠️ CUSTOMIZE:
     link: "https://www.roblox.com/games/108632069675268/Roll-Your-Cookie",
-    ctaText: "Roll Now",
+    ctaText: "Play Now",
     badge: "Featured"
   },
   {
@@ -41,7 +41,7 @@ const GAMES = [
     image: "https://tr.rbxcdn.com/180DAY-396fb6d6bae3f9248d76c91b8a739480/768/432/Image/Webp/noFilter",
     placeId: 116067010855801,
     link: "https://www.roblox.com/games/116067010855801/1-Nuke-Per-Click",
-    ctaText: "Nuke Now",
+    ctaText: "Play Now",
     badge: "Featured"
   },
   {
@@ -50,7 +50,7 @@ const GAMES = [
     image: "https://tr.rbxcdn.com/180DAY-70155b59c27edabbe377e5ef3610788b/768/432/Image/Webp/noFilter",
     placeId: 118651055528548,
     link: "https://www.roblox.com/games/118651055528548/1-Fly-Evolve",
-    ctaText: "Fly Now",
+    ctaText: "Play Now",
     badge: "Featured"
   },
   {
@@ -59,7 +59,7 @@ const GAMES = [
     image: "https://tr.rbxcdn.com/180DAY-780104ba23f04ab2c3fdaf3fde2dd425/768/432/Image/Webp/noFilter",
     placeId: 107573271137575,
     link: "https://www.roblox.com/games/107573271137575/Secure-the-Supermarket",
-    ctaText: "Secure Now",
+    ctaText: "Play Now",
     badge: "Featured"
   },
   {
@@ -77,7 +77,7 @@ const GAMES = [
     image: "https://tr.rbxcdn.com/180DAY-6161a9b22b600ff47cebb0b53e98892a/768/432/Image/Webp/noFilter",
     placeId: 97683439005414,
     link: "https://www.roblox.com/games/97683439005414/100-Players-Car-Crash",
-    ctaText: "Crash Now",
+    ctaText: "Play Now",
     badge: "Featured"
   },
    {
@@ -86,7 +86,7 @@ const GAMES = [
     image: "https://tr.rbxcdn.com/180DAY-4da1e8dfea18632eefe08624f27004c2/768/432/Image/Webp/noFilter",
     placeId: 91739789863159,
     link: "https://www.roblox.com/games/91739789863159/Spell-or-Fall",
-    ctaText: "Spell Now",
+    ctaText: "Play Now",
     badge: "Featured"
   }
 ];
