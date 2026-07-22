@@ -1,41 +1,65 @@
+# VJR Studio website
 
-## What's in here
+Static HTML/CSS/JavaScript with two Vercel serverless endpoints for Roblox data.
 
+## Files
+
+```text
+index.html          Home page and animated game-thumbnail wall
+games.html          Full portfolio
+ccu.html            Hourly CCU history
+style.css           Complete visual system and responsive layout
+games-config.js     Add, remove, or edit games here
+main.js             Renders artwork/cards, live stats, and the CCU chart
+api/stats.js        Live Roblox totals
+api/history.js      Hourly CCU snapshots stored in Upstash Redis
+vercel.json         Clean URLs
 ```
-index.html          → Home page
-games.html           → Full games portfolio page
-contact.html         → Contact / partnership form page
-style.css            → All the styling (colors, spacing, etc.)
-games-config.js       ⭐ EDIT THIS to add/remove/change your games
-main.js              → Fetches live stats and builds the game cards (no need to edit)
-api/stats.js         → Server-side function that talks to Roblox's API (must stay in an "api" folder — that's a Vercel requirement, not optional)
-vercel.json          → Makes URLs show as /games and /contact instead of .html
-images/              → Empty folder — drop game thumbnails or a logo file here if you want
-```
 
-Everything is flat (no `css/` or `js/` subfolders) so you can drag the
-whole thing into a VS Code window and start editing immediately. The
-only folder that has to exist is `api/`, because that's where Vercel
-looks for server functions.
+The Contact page has intentionally been removed. The live thumbnail wall, portfolio cards, page artwork, and stats all read from `games-config.js`.
 
-## The only file you need to edit: `games-config.js`
+## Edit games
 
-Every game is currently a **placeholder** — fake `placeId: 0` values, a
-generated placeholder thumbnail, and bracketed names like
-`[Placeholder] Speed Run Escape`. Live stats will show "—" until you
-replace them with real games. Each game looks like this:
+Each item in `games-config.js` supports:
 
 ```js
 {
   name: "Your Game Name",
-  description: "A short one/two sentence description.",
-  image: "images/your-thumbnail.png", // or a full Roblox thumbnail URL
-  placeId: 119068914321553,           // the number in your game's Roblox URL
-  link: "https://www.roblox.com/games/119068914321553/Your-Game",
+  description: "A short description.",
+  image: "https://...", // Local image paths also work
+  placeId: 119068914321553,
+  link: "https://www.roblox.com/games/...",
   ctaText: "Play Now",
-  badge: "Featured" // or "Acquired", "Partner", or "" to hide it
+  badge: "Featured"
 }
 ```
 
-Copy/paste a whole `{ ... }` block to add a game, or delete one to remove it.
-thanks for wokring loxqcx on dc for this website <3
+## Vercel setup for the CCU graph
+
+Connect an Upstash Redis database to the Vercel project and make sure one of these environment-variable pairs exists:
+
+- `KV_REST_API_URL` and `KV_REST_API_TOKEN`, or
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+
+The site requests `/api/history` on page visits. The endpoint stores at most one point per UTC hour, keeps 90 days, and automatically converts the old daily entries if they exist.
+
+### Optional guaranteed hourly snapshots
+
+Normal traffic creates hourly points without additional Vercel setup. To guarantee a point during hours with no visitors, a Vercel Pro plan (or another hourly scheduler) is required because Vercel Hobby cron jobs can only run once per day.
+
+On Vercel Pro:
+
+1. Add a `ROBLOX_PLACE_IDS` environment variable containing the comma-separated place IDs from `games-config.js`.
+2. Add this `crons` entry to `vercel.json`:
+
+```json
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "crons": [
+    { "path": "/api/history", "schedule": "5 * * * *" }
+  ]
+}
+```
+
+This runs five minutes after each UTC hour. Keep the current `vercel.json` on Hobby so deployment is not rejected by the hourly schedule.

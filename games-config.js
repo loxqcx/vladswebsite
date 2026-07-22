@@ -30,7 +30,7 @@ const GAMES = [
     name: "🍪 Roll Your Cookie",
     description: "Try to roll your cookie in the milk! avoid posion",
     image: "https://tr.rbxcdn.com/180DAY-d68646eecac23213e0be3101bcac2242/768/432/Image/Webp/noFilter",
-    placeId: 108632069675268, // ⚠️ CUSTOMIZE: put your real Roblox placeId here
+    placeId: 108632069675268, // ⚠️ CUSTOMIZE:
     link: "https://www.roblox.com/games/108632069675268/Roll-Your-Cookie",
     ctaText: "Roll Now",
     badge: "Featured"

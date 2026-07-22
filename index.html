@@ -1,184 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- CUSTOMIZE: title + description shown in browser tabs / search results / link previews -->
-<title>VJR Studio | Roblox Game Studio</title>
-<meta name="description" content="VJR Studio buys, builds, and grows Roblox games. Sell your game outright or partner with us." />
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#050505" />
+  <title>VJR Studio | Roblox Game Studio</title>
+  <meta name="description" content="VJR Studio builds, operates, and grows Roblox games." />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div id="page-loader" class="page-loader">
-  <!-- CUSTOMIZE: swap this inline SVG for <img src="images/logo.png" class="page-loader__logo"> if you have a real logo file -->
-  <svg class="page-loader__logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-    <rect width="40" height="40" rx="10" fill="#ffffff"/>
-    <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">V</text>
-  </svg>
-  <div class="page-loader__spinner"></div>
-</div>
-
-<nav class="navbar">
-  <div class="container">
-    <a href="/" class="brand">
-      <!-- CUSTOMIZE: swap for <img src="images/logo.png" class="brand__mark"> if you have a real logo file -->
-      <svg class="brand__mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#ffffff"/>
-        <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">V</text>
-      </svg>
-      VJR Studio
-    </a>
-    <ul class="nav-links">
-      <li><a href="/">Home</a></li>
-      <li><a href="/games">Games</a></li>
-      <li><a href="/ccu">CCU</a></li>
-      <li><a href="/contact" class="btn btn--primary">Get in touch</a></li>
-    </ul>
-    <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+  <div id="page-loader" class="page-loader" aria-hidden="true">
+    <span class="logo-mark logo-mark--loader">V</span>
+    <span class="page-loader__bar"><span></span></span>
   </div>
-</nav>
 
-<header class="hero" id="home">
-  <div class="container">
-    <!-- CUSTOMIZE: swap for <img src="images/logo.png" class="hero__logo"> if you have a real logo file -->
-    <svg class="hero__logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="10" fill="#ffffff"/>
-      <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">V</text>
-    </svg>
-
-    <span class="eyebrow"><span class="pulse-dot"></span>Live Roblox analytics</span>
-    <!-- CUSTOMIZE: main headline -->
-    <h1>We buy, build, and grow Roblox games.</h1>
-
-    <div class="hero-ctas">
-      <a href="/games" class="btn btn--primary">See our games ↗</a>
-      <a href="/ccu" class="btn btn--secondary">View CCU Graph 📈</a>
-      <a href="/contact" class="btn btn--secondary">Sell or partner with us</a>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-box">
-        <span class="stat-value" data-stat="visits">—</span>
-        <span class="stat-label">Total visits</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-value" data-stat="players">—</span>
-        <span class="stat-label">Playing now</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-value" data-stat="projects">—</span>
-        <span class="stat-label">Games live</span>
-      </div>
-    </div>
-  </div>
-</header>
-
-<section id="about" class="reveal">
-  <div class="container">
-    <div class="about-block">
-      <!-- CUSTOMIZE: swap for <img src="images/logo.png" class="about-block__mark"> if you have a real logo file -->
-      <svg class="about-block__mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#ffffff"/>
-        <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">V</text>
-      </svg>
-      <h2>VJR Studio</h2>
-      <p class="about-block__tagline">Roblox acquisition &amp; production studio</p>
-      <!-- CUSTOMIZE: about copy — replace with your studio's real story -->
-      <p>We work both sides of Roblox game growth: acquiring proven titles and building new ones from scratch. Either way, the goal is the same — keep players coming back.</p>
-      <p>Some creators sell to us outright. Others take investment and keep building alongside our team. For games we build ourselves, we handle everything from prototype to launch.</p>
-      <p>If you've got a game with real players — or an idea worth building — <strong>let's talk about what's next.</strong></p>
-    </div>
-  </div>
-</section>
-
-<section id="featured" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="eyebrow">Featured games</span>
-      <h2>Titles we're actively growing.</h2>
-      <p>A rotating look at games in the portfolio, with live stats pulled straight from Roblox.</p>
-    </div>
-  </div>
-  <div class="container">
-    <!-- data-games-marquee limits how many show in the strip (leave off the number attribute value to show all) -->
-    <div class="games-marquee">
-      <div class="games-marquee__track" data-games-marquee="6"></div>
-    </div>
-    <div class="section-cta">
-      <a href="/games" class="btn btn--secondary">View all games →</a>
-    </div>
-  </div>
-</section>
-
-<section id="partner" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="eyebrow">How we partner</span>
-      <h2>A few ways to work together.</h2>
-      <p>Most creators who reach out already have a game with real players — or an idea worth building. Here's how it typically goes.</p>
-    </div>
-    <div class="cards-grid">
-      <!-- CUSTOMIZE: these four cards — wording, order, or add/remove a card -->
-      <div class="info-card">
-        <h3>Sell your game</h3>
-        <p>Built something with real players? We'll buy it outright, price it against your actual stats, and take over operations after close.</p>
-      </div>
-      <div class="info-card">
-        <h3>Build with us</h3>
-        <p>Have an idea but not the team? We can build it from prototype to launch, handling production, art, and systems along the way.</p>
-      </div>
-      <div class="info-card">
-        <h3>Take investment</h3>
-        <p>Not ready to sell? We invest and stay involved — you keep building while we help grow the player base.</p>
-      </div>
-      <div class="info-card">
-        <h3>Clean handoff</h3>
-        <p>Group access, assets, player communications, and the first stretch of live-ops — we manage the transition end to end.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="cta-band reveal">
-  <div class="container">
-    <span class="eyebrow">Thinking about selling or partnering?</span>
-    <h2>Let's talk about your game.</h2>
-    <a href="/contact" class="btn btn--primary">Get in touch ↗</a>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div class="footer-top">
-      <a href="/" class="brand">
-        <svg class="brand__mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <rect width="40" height="40" rx="10" fill="#ffffff"/>
-          <text x="20" y="27" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="#000000">V</text>
-        </svg>
-        VJR Studio
+  <nav class="navbar" aria-label="Primary navigation">
+    <div class="container navbar__inner">
+      <a href="/" class="brand" aria-label="VJR Studio home">
+        <span class="logo-mark">V</span>
+        <span class="brand__words"><b>VJR</b><small>Studio</small></span>
       </a>
-      <ul class="footer-links">
-        <li><a href="/">Home</a></li>
+      <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false">Menu</button>
+      <ul class="nav-links">
+        <li><a href="/" aria-current="page">Home</a></li>
         <li><a href="/games">Games</a></li>
-        <li><a href="/contact">Contact</a></li>
+        <li><a href="/ccu">CCU</a></li>
       </ul>
     </div>
+  </nav>
 
-    <!-- CUSTOMIZE: social links — replace # with your real URLs, or delete a line you don't need -->
-    <ul class="footer-social">
-      <li><a href="https://www.roblox.com/communities/328090928/Who-Wants-A-Cookie#!/about" target="_blank" rel="noopener">Roblox Group</a></li>
-      <li><a href="#" target="_blank" rel="noopener">Discord - __vman</a></li>
-    </ul>
+  <main>
+    <header class="hero hero--home" id="home">
+      <div class="hero-mosaic" data-hero-mosaic aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="container hero__content">
+        <div class="hero-lockup" aria-label="VJR Studio">
+          <span class="logo-mark logo-mark--hero">V</span>
+          <div><strong>VJR</strong><span>Studio</span></div>
+        </div>
+        <p class="hero__tagline">We build and grow Roblox games.</p>
 
-    <p class="footer-stats">
-      <b data-stat="visits">—</b> visits &nbsp;•&nbsp; <b data-stat="players">—</b> playing &nbsp;•&nbsp; <b data-stat="projects">—</b> games
-    </p>
-    <p class="footer-note">© <span data-year>2026</span> VJR Studio. Not affiliated with Roblox Corporation.</p>
-  </div>
-</footer>
+        <div class="stats-row" aria-label="Live studio statistics">
+          <div class="stat-box">
+            <span class="stat-value" data-stat="visits">&mdash;</span>
+            <span class="stat-label">Total visits</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" data-stat="players">&mdash;</span>
+            <span class="stat-label">Playing now</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value" data-stat="projects">&mdash;</span>
+            <span class="stat-label">Games live</span>
+          </div>
+        </div>
 
-<script src="games-config.js"></script>
-<script src="main.js"></script>
+        <div class="hero-ctas">
+          <a href="/games" class="btn btn--primary">See our games <span aria-hidden="true">&rarr;</span></a>
+          <a href="/ccu" class="btn btn--glass">View CCU history</a>
+        </div>
+      </div>
+      <a href="#about" class="scroll-cue" aria-label="Scroll to learn more"><span></span>Explore</a>
+    </header>
+
+    <section id="about" class="section section--light reveal">
+      <div class="container about-grid">
+        <div class="about-visual" data-about-visual aria-hidden="true">
+          <div class="about-visual__card about-visual__card--back"></div>
+          <div class="about-visual__card about-visual__card--front"></div>
+          <span class="about-visual__badge"><b data-stat="projects">&mdash;</b> live games</span>
+        </div>
+        <div class="about-copy">
+          <span class="eyebrow">Who we are</span>
+          <h2>Games players come back to.</h2>
+          <p class="lead">VJR is a Roblox production studio focused on simple ideas, strong loops, and live experiences that keep moving.</p>
+          <p>We build games from the first prototype through launch, then stay close to the data. Updates, balancing, events, and operations all happen under one roof.</p>
+          <a href="/games" class="text-link">Meet the portfolio <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="featured" class="section section--dark reveal">
+      <div class="container section-head section-head--split">
+        <div>
+          <span class="eyebrow">Featured games</span>
+          <h2>Built to be played.</h2>
+        </div>
+        <p>Live titles from the VJR portfolio, ranked by current players and updated directly from Roblox.</p>
+      </div>
+      <div class="games-marquee">
+        <div class="games-marquee__track" data-games-marquee="7"></div>
+      </div>
+      <div class="container section-cta">
+        <a href="/games" class="btn btn--outline">View all games <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </section>
+
+    <section class="section section--ink reveal">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">How we work</span>
+          <h2>From idea to live ops.</h2>
+          <p>Small, focused teams. Fast iteration. Decisions grounded in what players actually do.</p>
+        </div>
+        <div class="process-grid">
+          <article class="process-card"><span>01</span><h3>Prototype</h3><p>Find the fun quickly and prove the core loop before the game gets heavy.</p></article>
+          <article class="process-card"><span>02</span><h3>Build</h3><p>Turn the strongest idea into a polished, readable experience that works everywhere.</p></article>
+          <article class="process-card"><span>03</span><h3>Launch</h3><p>Ship, watch the live numbers, and make the first improvements while they matter most.</p></article>
+          <article class="process-card"><span>04</span><h3>Grow</h3><p>Keep players engaged through updates, events, balancing, and reliable live operations.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-panel reveal">
+      <div class="cta-panel__art" data-cta-art aria-hidden="true"></div>
+      <div class="cta-panel__shade" aria-hidden="true"></div>
+      <div class="container cta-panel__content">
+        <span class="eyebrow">The portfolio is live</span>
+        <h2>See what players are playing now.</h2>
+        <a href="/games" class="btn btn--primary">Explore every game <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <a href="/" class="brand"><span class="logo-mark">V</span><span class="brand__words"><b>VJR</b><small>Studio</small></span></a>
+        <ul class="footer-links"><li><a href="/">Home</a></li><li><a href="/games">Games</a></li><li><a href="/ccu">CCU</a></li></ul>
+      </div>
+      <div class="footer__bottom">
+        <p><b data-stat="visits">&mdash;</b> visits <span>&bull;</span> <b data-stat="players">&mdash;</b> playing <span>&bull;</span> <b data-stat="projects">&mdash;</b> games</p>
+        <p>&copy; <span data-year>2026</span> VJR Studio. Not affiliated with Roblox Corporation.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="games-config.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

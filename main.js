@@ -1,389 +1,335 @@
-// ============================================================
-// You shouldn't need to edit this file. To change which games
-// show up, edit games-config.js instead.
-// ============================================================
-
-const REFRESH_SECONDS = 60; // CUSTOMIZE: how often stats refresh, in seconds
+const REFRESH_SECONDS = 60;
 
 let lastUpdatedAt = null;
 let secondsUntilRefresh = REFRESH_SECONDS;
 let displayedValues = { players: 0, visits: 0, projects: 0 };
 
 function formatNumber(num) {
-  if (num === null || num === undefined) return "—";
-  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(2).replace(/\.?0+$/, "") + "B+";
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M+";
-  if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K+";
-  return String(num);
+  if (num === null || num === undefined || Number.isNaN(Number(num))) return "\u2014";
+  const value = Number(num);
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2).replace(/\.?0+$/, "")}B+`;
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M+`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K+`;
+  return String(Math.round(value));
 }
 
-function animateValue(el, from, to, formatFn, duration = 1400) {
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function animateValue(el, from, to, formatFn, duration = 1100) {
   const startTime = performance.now();
   function tick(now) {
     const progress = Math.min((now - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-    const value = from + (to - from) * eased;
-    el.textContent = formatFn(value);
-    if (progress < 1) {
-      requestAnimationFrame(tick);
-    } else {
-      el.textContent = formatFn(to);
-    }
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = formatFn(from + (to - from) * eased);
+    if (progress < 1) requestAnimationFrame(tick);
+    else el.textContent = formatFn(to);
   }
   requestAnimationFrame(tick);
 }
 
-async function fetchStats() {
-  const placeIds = GAMES.map((g) => g.placeId).join(",");
-  const res = await fetch(`/api/stats?placeIds=${placeIds}`);
-  if (!res.ok) throw new Error("Stats request failed");
-  return res.json();
+function setBackgrounds(selector, gameIndexes) {
+  document.querySelectorAll(selector).forEach((el, index) => {
+    const game = GAMES[gameIndexes[index % gameIndexes.length] % GAMES.length];
+    if (game) el.style.backgroundImage = `url("${game.image}")`;
+  });
 }
 
-function renderHeroStats(totals) {
-  // Multiple elements can share the same data-stat (hero, stat boxes,
-  // and the footer recap line all update together automatically).
-  document.querySelectorAll("[data-stat='players']").forEach((el) =>
-    animateValue(el, displayedValues.players, totals.players, (v) => formatNumber(Math.round(v)))
-  );
-  document.querySelectorAll("[data-stat='visits']").forEach((el) =>
-    animateValue(el, displayedValues.visits, totals.visits, (v) => formatNumber(Math.round(v)))
-  );
-  document.querySelectorAll("[data-stat='projects']").forEach((el) =>
-    animateValue(el, displayedValues.projects, totals.projects, (v) => String(Math.round(v)))
-  );
+function renderHeroMosaic() {
+  const mosaic = document.querySelector("[data-hero-mosaic]");
+  if (!mosaic || !GAMES.length) return;
 
-  displayedValues = { players: totals.players, visits: totals.visits, projects: totals.projects };
+  const rows = 4;
+  const rowMarkup = Array.from({ length: rows }, (_, rowIndex) => {
+    const ordered = GAMES.map((_, index) => GAMES[(index + rowIndex * 2) % GAMES.length]);
+    const tiles = ordered
+      .map((game) => `<span class="mosaic-tile" style="background-image:url('${game.image}')"></span>`)
+      .join("");
+    return `<div class="mosaic-row">${tiles}${tiles}</div>`;
+  }).join("");
+
+  mosaic.innerHTML = rowMarkup;
+}
+
+function renderPageArtwork() {
+  setBackgrounds(".about-visual__card", [1, 0]);
+  setBackgrounds("[data-cta-art]", [4]);
+  setBackgrounds("[data-page-hero-art]", [2]);
+}
+
+async function fetchStats() {
+  const placeIds = GAMES.map((game) => game.placeId).join(",");
+  const response = await fetch(`/api/stats?placeIds=${placeIds}`);
+  if (!response.ok) throw new Error("Stats request failed");
+  return response.json();
+}
+
+function renderSiteStats(totals) {
+  const safeTotals = {
+    players: Number(totals.players) || 0,
+    visits: Number(totals.visits) || 0,
+    projects: Number(totals.projects) || GAMES.length,
+  };
+
+  Object.entries(safeTotals).forEach(([key, value]) => {
+    document.querySelectorAll(`[data-stat="${key}"]`).forEach((el) => {
+      animateValue(el, displayedValues[key], value, key === "projects" ? (v) => String(Math.round(v)) : (v) => formatNumber(v));
+    });
+  });
+  displayedValues = safeTotals;
 }
 
 function gameCardHTML(game, stats) {
-  const badge = game.badge
-    ? `<span class="marquee-card__badge">${game.badge}</span>`
-    : "";
+  const badge = game.badge ? `<span class="marquee-card__badge">${escapeHTML(game.badge)}</span>` : "";
   return `
-    <a class="marquee-card" href="${game.link}" target="_blank" rel="noopener">
-      <div class="marquee-card__image" style="background-image: url('${game.image}')"></div>
+    <a class="marquee-card" href="${escapeHTML(game.link)}" target="_blank" rel="noopener noreferrer">
+      <div class="marquee-card__image" style="background-image:url('${game.image}')"></div>
       <div class="marquee-card__body">
         ${badge}
-        <h4>${game.name}</h4>
+        <h3>${escapeHTML(game.name)}</h3>
         <div class="marquee-card__stats">
           <span><b>${formatNumber(stats.visits)}</b> visits</span>
           <span><b>${formatNumber(stats.playing)}</b> playing</span>
         </div>
       </div>
-    </a>
-  `;
+    </a>`;
 }
 
-// Renders the auto-scrolling "Featured games" strip on the homepage.
-// The list is duplicated once so the CSS animation (translateX -50%)
-// loops seamlessly. data-games-marquee="6" limits how many are shown
-// (leave blank to show all).
 function renderMarquee(statsByPlaceId) {
   const track = document.querySelector("[data-games-marquee]");
   if (!track) return;
-
   const limit = Number(track.dataset.gamesMarquee) || GAMES.length;
   const games = GAMES.slice(0, limit);
-
-  const cardsHTML = games
-    .map((game) => gameCardHTML(game, statsByPlaceId.get(String(game.placeId)) || { playing: null, visits: null }))
-    .join("");
-
-  // Duplicate the set so the marquee can loop without a visible seam.
-  track.innerHTML = cardsHTML + cardsHTML;
+  const cards = games.map((game) => gameCardHTML(game, statsByPlaceId.get(String(game.placeId)) || {})).join("");
+  track.innerHTML = cards + cards;
 }
 
-// Renders the full grid of games (used on the /games page).
 function renderGameGrid(statsByPlaceId) {
   const grid = document.querySelector("[data-games-grid]");
   if (!grid) return;
 
-  const limit = Number(grid.dataset.gamesGrid) || null;
-  const games = limit ? GAMES.slice(0, limit) : GAMES.slice();
-
-  // Highest CCU (current players) first, lowest last.
-  games.sort((a, b) => {
-    const aPlaying = (statsByPlaceId.get(String(a.placeId)) || {}).playing || 0;
-    const bPlaying = (statsByPlaceId.get(String(b.placeId)) || {}).playing || 0;
+  const games = GAMES.slice().sort((a, b) => {
+    const aPlaying = Number(statsByPlaceId.get(String(a.placeId))?.playing) || 0;
+    const bPlaying = Number(statsByPlaceId.get(String(b.placeId))?.playing) || 0;
     return bPlaying - aPlaying;
   });
 
-  grid.innerHTML = "";
-
-  games.forEach((game) => {
-    const stats = statsByPlaceId.get(String(game.placeId)) || { playing: null, visits: null };
-    const card = document.createElement("article");
-    card.className = "game-card";
-    card.innerHTML = `
-      <div class="game-card__image" style="background-image: url('${game.image}')"></div>
-      <div class="game-card__body">
-        <h3>${game.name}</h3>
-        <p>${game.description}</p>
-        <div class="game-card__stats">
-          <div><span class="stat-value">${formatNumber(stats.playing)}</span><span class="stat-label">Playing now</span></div>
-          <div><span class="stat-value">${formatNumber(stats.visits)}</span><span class="stat-label">Total visits</span></div>
+  grid.innerHTML = games.map((game) => {
+    const stats = statsByPlaceId.get(String(game.placeId)) || {};
+    return `
+      <article class="game-card">
+        <a class="game-card__image-link" href="${escapeHTML(game.link)}" target="_blank" rel="noopener noreferrer" aria-label="Play ${escapeHTML(game.name)} on Roblox">
+          <div class="game-card__image" style="background-image:url('${game.image}')"></div>
+        </a>
+        <div class="game-card__body">
+          <h3>${escapeHTML(game.name)}</h3>
+          <p>${escapeHTML(game.description)}</p>
+          <div class="game-card__stats">
+            <div><span class="stat-value">${formatNumber(stats.playing)}</span><span class="stat-label">Playing</span></div>
+            <div><span class="stat-value">${formatNumber(stats.visits)}</span><span class="stat-label">Visits</span></div>
+          </div>
+          <a class="btn btn--outline game-card__action" href="${escapeHTML(game.link)}" target="_blank" rel="noopener noreferrer">${escapeHTML(game.ctaText)} <span aria-hidden="true">&nearr;</span></a>
         </div>
-        <a class="btn btn--secondary" href="${game.link}" target="_blank" rel="noopener">${game.ctaText} ↗</a>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-function updateFooterText() {
-  const agoEl = document.querySelector("[data-updated-ago]");
-  const inEl = document.querySelector("[data-updating-in]");
-  if (!agoEl || !inEl) return;
-
-  if (lastUpdatedAt === null) {
-    agoEl.textContent = "Updating…";
-  } else {
-    const secondsAgo = Math.max(0, Math.round((Date.now() - lastUpdatedAt) / 1000));
-    agoEl.textContent = secondsAgo <= 1 ? "Updated just now" : `Updated ${secondsAgo}s ago`;
-  }
-  inEl.textContent = `Refreshing in ${secondsUntilRefresh}s`;
+      </article>`;
+  }).join("");
 }
 
 function hidePageLoader() {
   const loader = document.getElementById("page-loader");
   if (!loader) return;
   loader.classList.add("page-loader--hidden");
-  setTimeout(() => loader.remove(), 600);
+  window.setTimeout(() => loader.remove(), 500);
 }
 
 async function loadAndRender() {
   try {
     const { games, totals } = await fetchStats();
-    const statsByPlaceId = new Map(games.map((g) => [String(g.placeId), g]));
-    renderHeroStats(totals);
+    const statsByPlaceId = new Map((games || []).map((game) => [String(game.placeId), game]));
+    renderSiteStats(totals || { players: 0, visits: 0, projects: GAMES.length });
     renderMarquee(statsByPlaceId);
     renderGameGrid(statsByPlaceId);
     lastUpdatedAt = Date.now();
-  } catch (err) {
-    console.error("Could not load live stats:", err);
-    // Fall back to showing placeholder cards so the page still looks
-    // complete (e.g. before you've deployed to Vercel).
+  } catch (error) {
+    console.warn("Live stats are unavailable in this preview.");
+    renderSiteStats({ players: 0, visits: 0, projects: GAMES.length });
     renderMarquee(new Map());
     renderGameGrid(new Map());
   } finally {
     secondsUntilRefresh = REFRESH_SECONDS;
-    updateFooterText();
   }
 }
 
-// Fades sections in as they scroll into view. Add class="reveal" to
-// any element in the HTML to opt it into this effect.
 function setupScrollReveal() {
   const items = document.querySelectorAll(".reveal");
   if (!items.length) return;
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("reveal--visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.15 }
-  );
+  if (!("IntersectionObserver" in window)) {
+    items.forEach((item) => item.classList.add("reveal--visible"));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("reveal--visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
   items.forEach((item) => observer.observe(item));
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const loaderStartedAt = Date.now();
-  await loadAndRender();
-  const minDisplayMs = 500;
-  const remaining = Math.max(0, minDisplayMs - (Date.now() - loaderStartedAt));
-  setTimeout(hidePageLoader, remaining);
-
-  setupScrollReveal();
-  initCcuGraphPage();
-
-  // Keep the footer year current automatically — never goes stale.
-  document.querySelectorAll("[data-year]").forEach((el) => {
-    el.textContent = new Date().getFullYear();
+function setupMobileNav() {
+  const toggle = document.querySelector(".nav-toggle");
+  const links = document.querySelector(".nav-links");
+  if (!toggle || !links) return;
+  toggle.addEventListener("click", () => {
+    const isOpen = links.classList.toggle("nav-links--open");
+    document.body.classList.toggle("nav-open", isOpen);
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    toggle.textContent = isOpen ? "Close" : "Menu";
   });
+}
 
-  // Ticks once a second: counts down to the next refresh and keeps
-  // "Updated Ns ago" accurate in between fetches.
-  setInterval(() => {
-    secondsUntilRefresh = Math.max(0, secondsUntilRefresh - 1);
-    updateFooterText();
-    if (secondsUntilRefresh === 0) {
-      loadAndRender();
-    }
-  }, 1000);
+function historyUrl() {
+  return `/api/history?placeIds=${GAMES.map((game) => game.placeId).join(",")}`;
+}
 
-  // Mobile nav toggle
-  const navToggle = document.querySelector(".nav-toggle");
-  const navLinks = document.querySelector(".nav-links");
-  if (navToggle && navLinks) {
-    navToggle.addEventListener("click", () => {
-      navLinks.classList.toggle("nav-links--open");
-    });
-  }
-});
+function normalizeHistoryEntry(entry) {
+  const timestamp = entry.timestamp || (entry.date ? `${entry.date}T00:00:00.000Z` : null);
+  return timestamp ? { timestamp, players: Number(entry.players) || 0 } : null;
+}
 
-// ============================================================
-// CCU GRAPH PAGE — only runs on ccu.html (checks for the container
-// first). Fetches daily history from /api/history and draws an
-// animated SVG line chart.
-// ============================================================
-
-function formatChartDate(dateStr) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+function formatChartTime(timestamp, includeDate = false) {
+  const date = new Date(timestamp);
+  const options = includeDate
+    ? { month: "short", day: "numeric", hour: "numeric" }
+    : { hour: "numeric" };
+  return date.toLocaleString(undefined, options);
 }
 
 function smoothPath(points) {
   if (points.length < 2) return "";
-  let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[i];
-    const p1 = points[i + 1];
-    const midX = (p0.x + p1.x) / 2;
-    const midY = (p0.y + p1.y) / 2;
-    d += ` Q ${p0.x} ${p0.y} ${midX} ${midY}`;
+  let path = `M ${points[0].x} ${points[0].y}`;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const current = points[index];
+    const next = points[index + 1];
+    const midX = (current.x + next.x) / 2;
+    const midY = (current.y + next.y) / 2;
+    path += ` Q ${current.x} ${current.y} ${midX} ${midY}`;
   }
   const last = points[points.length - 1];
-  d += ` L ${last.x} ${last.y}`;
-  return d;
+  return `${path} L ${last.x} ${last.y}`;
 }
 
 function setupCcuTooltip(wrap, points, chartWidth, chartHeight) {
   const svg = wrap.querySelector(".ccu-chart");
   const tooltip = wrap.querySelector("[data-ccu-tooltip]");
   if (!svg || !tooltip) return;
-
-  svg.addEventListener("mousemove", (e) => {
+  svg.addEventListener("mousemove", (event) => {
     const rect = svg.getBoundingClientRect();
-    const scaleX = rect.width / chartWidth;
-    const relX = (e.clientX - rect.left) / scaleX;
-
-    let nearest = points[0];
-    let nearestDist = Infinity;
-    points.forEach((p) => {
-      const dist = Math.abs(p.x - relX);
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearest = p;
-      }
-    });
-
+    const relativeX = (event.clientX - rect.left) / (rect.width / chartWidth);
+    const nearest = points.reduce((best, point) => Math.abs(point.x - relativeX) < Math.abs(best.x - relativeX) ? point : best, points[0]);
     tooltip.style.opacity = "1";
     tooltip.style.left = `${(nearest.x / chartWidth) * 100}%`;
     tooltip.style.top = `${(nearest.y / chartHeight) * 100}%`;
-    tooltip.textContent = `${formatChartDate(nearest.date)} • ${formatNumber(nearest.players)} playing`;
+    tooltip.textContent = `${formatChartTime(nearest.timestamp, true)} \u00b7 ${formatNumber(nearest.players)} players`;
   });
-
-  svg.addEventListener("mouseleave", () => {
-    tooltip.style.opacity = "0";
-  });
+  svg.addEventListener("mouseleave", () => { tooltip.style.opacity = "0"; });
 }
 
 function renderCcuChart(wrap, history) {
   const width = 1000;
-  const height = 380;
-  const padLeft = 54;
-  const padRight = 20;
-  const padTop = 24;
-  const padBottom = 40;
-
-  const values = history.map((h) => h.players);
+  const height = 390;
+  const pad = { left: 58, right: 18, top: 24, bottom: 44 };
+  const values = history.map((entry) => entry.players);
   const max = Math.max(...values, 1);
-  const min = Math.min(...values, 0);
-  const range = max - min || 1;
-
-  const plotW = width - padLeft - padRight;
-  const plotH = height - padTop - padBottom;
-
-  const points = history.map((h, i) => {
-    const x = history.length === 1 ? padLeft + plotW / 2 : padLeft + (i / (history.length - 1)) * plotW;
-    const y = padTop + plotH - ((h.players - min) / range) * plotH;
-    return { x, y, date: h.date, players: h.players };
-  });
+  const min = Math.min(...values);
+  const chartMin = Math.max(0, min - Math.max(1, (max - min) * 0.18));
+  const range = max - chartMin || 1;
+  const plotWidth = width - pad.left - pad.right;
+  const plotHeight = height - pad.top - pad.bottom;
+  const points = history.map((entry, index) => ({
+    x: history.length === 1 ? pad.left + plotWidth / 2 : pad.left + (index / (history.length - 1)) * plotWidth,
+    y: pad.top + plotHeight - ((entry.players - chartMin) / range) * plotHeight,
+    ...entry,
+  }));
 
   const linePath = smoothPath(points);
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${padTop + plotH} L ${points[0].x} ${padTop + plotH} Z`;
-
-  const maxLabels = 7;
-  const labelStep = Math.max(1, Math.ceil(points.length / maxLabels));
-  const dateLabels = points
-    .filter((_, i) => i % labelStep === 0 || i === points.length - 1)
-    .map((p) => `<text x="${p.x}" y="${height - 12}" class="ccu-chart__axis-label" text-anchor="middle">${formatChartDate(p.date)}</text>`)
-    .join("");
-
-  const gridLines = [0, 0.25, 0.5, 0.75, 1]
-    .map((t) => {
-      const y = padTop + plotH * t;
-      const val = Math.round(max - t * range);
-      return `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="ccu-chart__grid" /><text x="${padLeft - 10}" y="${y + 4}" class="ccu-chart__axis-label" text-anchor="end">${formatNumber(val)}</text>`;
-    })
-    .join("");
+  const areaPath = `${linePath} L ${points.at(-1).x} ${pad.top + plotHeight} L ${points[0].x} ${pad.top + plotHeight} Z`;
+  const labelStep = Math.max(1, Math.ceil(points.length / 6));
+  const labels = points.filter((_, index) => index % labelStep === 0 || index === points.length - 1).map((point, index, filtered) => {
+    const showDate = index === 0 || index === filtered.length - 1 || new Date(point.timestamp).getHours() === 0;
+    return `<text x="${point.x}" y="${height - 12}" class="ccu-chart__axis-label" text-anchor="middle">${formatChartTime(point.timestamp, showDate)}</text>`;
+  }).join("");
+  const grid = [0, .25, .5, .75, 1].map((step) => {
+    const y = pad.top + plotHeight * step;
+    const value = Math.round(max - step * range);
+    return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" class="ccu-chart__grid"/><text x="${pad.left - 11}" y="${y + 4}" class="ccu-chart__axis-label" text-anchor="end">${formatNumber(value)}</text>`;
+  }).join("");
 
   wrap.innerHTML = `
-    <svg class="ccu-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="ccuFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28" />
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      ${gridLines}
-      <path d="${areaPath}" fill="url(#ccuFill)" stroke="none"></path>
-      <path d="${linePath}" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="ccu-chart__line"></path>
-      ${points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="4" class="ccu-chart__dot"></circle>`).join("")}
-      ${dateLabels}
-    </svg>
-    <div class="ccu-chart__tooltip" data-ccu-tooltip></div>
-  `;
+    <svg class="ccu-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="Hourly concurrent player history">
+      <defs><linearGradient id="ccuFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity=".22"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+      ${grid}<path d="${areaPath}" fill="url(#ccuFill)"/><path class="ccu-chart__line" d="${linePath}" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      ${points.map((point) => `<circle cx="${point.x}" cy="${point.y}" r="3.5" class="ccu-chart__dot"/>`).join("")}${labels}
+    </svg><div class="ccu-chart__tooltip" data-ccu-tooltip></div>`;
 
-  const linePathEl = wrap.querySelector(".ccu-chart__line");
-  const length = linePathEl.getTotalLength();
-  linePathEl.style.strokeDasharray = length;
-  linePathEl.style.strokeDashoffset = length;
-  requestAnimationFrame(() => {
-    linePathEl.style.transition = "stroke-dashoffset 1.4s ease";
-    linePathEl.style.strokeDashoffset = "0";
-  });
-
+  const line = wrap.querySelector(".ccu-chart__line");
+  if (line && typeof line.getTotalLength === "function") {
+    const length = line.getTotalLength();
+    line.style.strokeDasharray = length;
+    line.style.strokeDashoffset = length;
+    requestAnimationFrame(() => { line.style.transition = "stroke-dashoffset 1.2s ease"; line.style.strokeDashoffset = "0"; });
+  }
   setupCcuTooltip(wrap, points, width, height);
 }
 
 function renderCcuStats(history) {
-  const peak = Math.max(...history.map((h) => h.players));
-  const current = history[history.length - 1].players;
-  const days = history.length;
-
-  const setText = (key, text) => {
-    const el = document.querySelector(`[data-ccu-stat="${key}"]`);
-    if (el) el.textContent = text;
-  };
-  setText("peak", formatNumber(peak));
-  setText("current", formatNumber(current));
-  setText("days", String(days));
+  const values = history.map((entry) => entry.players);
+  const peak = document.querySelector('[data-ccu-stat="peak"]');
+  const hours = document.querySelector('[data-ccu-stat="hours"]');
+  if (peak) peak.textContent = formatNumber(Math.max(...values));
+  if (hours) hours.textContent = String(history.length);
 }
 
-function initCcuGraphPage() {
+async function initHourlyHistory() {
   const wrap = document.querySelector("[data-ccu-graph]");
-  if (!wrap) return; // not on the CCU graph page, skip entirely
-
-  const placeIds = GAMES.map((g) => g.placeId).join(",");
-
-  fetch(`/api/history?placeIds=${placeIds}`)
-    .then((res) => res.json())
-    .then(({ history }) => {
-      if (!history || history.length === 0) {
-        wrap.innerHTML = `<div class="ccu-chart-empty">No history yet — daily data starts building from today. Check back tomorrow!</div>`;
-        return;
-      }
-      renderCcuChart(wrap, history);
-      renderCcuStats(history);
-    })
-    .catch(() => {
-      wrap.innerHTML = `<div class="ccu-chart-empty">Couldn't load history right now — try refreshing.</div>`;
-    });
+  try {
+    const response = await fetch(historyUrl());
+    if (!response.ok) throw new Error("History request failed");
+    const data = await response.json();
+    const history = (data.history || []).map(normalizeHistoryEntry).filter(Boolean);
+    if (!wrap) return;
+    if (!history.length) {
+      wrap.innerHTML = '<div class="ccu-chart-empty">No hourly snapshots yet. The first point will be saved as soon as the history database is connected.</div>';
+      return;
+    }
+    renderCcuStats(history);
+    renderCcuChart(wrap, history);
+  } catch (error) {
+    if (wrap) wrap.innerHTML = '<div class="ccu-chart-empty">Hourly history is unavailable right now. Try refreshing in a moment.</div>';
+  }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const loaderStartedAt = Date.now();
+  renderHeroMosaic();
+  renderPageArtwork();
+  setupMobileNav();
+  setupScrollReveal();
+  document.querySelectorAll("[data-year]").forEach((el) => { el.textContent = new Date().getFullYear(); });
+
+  await loadAndRender();
+  initHourlyHistory();
+  window.setTimeout(hidePageLoader, Math.max(0, 400 - (Date.now() - loaderStartedAt)));
+
+  window.setInterval(() => {
+    secondsUntilRefresh = Math.max(0, secondsUntilRefresh - 1);
+    if (secondsUntilRefresh === 0) loadAndRender();
+  }, 1000);
+});
