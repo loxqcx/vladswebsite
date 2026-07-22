@@ -7,7 +7,7 @@ Static HTML/CSS/JavaScript with two Vercel serverless endpoints for Roblox data.
 ```text
 index.html          Home page and animated game-thumbnail wall
 games.html          Full portfolio
-ccu.html            Hourly aggregate peak and top-five game history
+ccu.html            Hourly portfolio-wide CCU history
 style.css           Complete visual system and responsive layout
 games-config.js     Add, remove, or edit games here
 main.js             Renders artwork/cards, live stats, and the CCU chart
@@ -41,7 +41,7 @@ Connect an Upstash Redis database to the Vercel project and make sure one of the
 - `KV_REST_API_URL` and `KV_REST_API_TOKEN`, or
 - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
 
-The site requests `/api/history` on page visits. The endpoint stores the aggregate CCU and every game's CCU at most once per UTC hour, keeps 90 days, and automatically converts old daily entries if they exist. The graph ranks the latest snapshot, then plots those five experiences in stable per-game colors; the displayed five can therefore change each hour.
+The site requests `/api/history` on page visits. The endpoint stores the portfolio's total CCU at most once per UTC hour, keeps 90 days, and automatically converts old daily entries if they exist.
 
 ### Optional guaranteed hourly snapshots
 

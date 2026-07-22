@@ -26,54 +26,30 @@ async function kvSet(key, value) {
   if (!response.ok) throw new Error("KV set failed");
 }
 
-async function fetchGameStats(placeIds) {
-  const universeLookups = await Promise.all(placeIds.map(async (placeId) => {
+async function fetchTotalPlayers(placeIds) {
+  const universeIds = await Promise.all(placeIds.map(async (placeId) => {
     try {
       const response = await fetch(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
-      if (!response.ok) return { placeId, universeId: null };
+      if (!response.ok) return null;
       const data = await response.json();
-      return { placeId, universeId: data.universeId ?? null };
+      return data.universeId ?? null;
     } catch {
-      return { placeId, universeId: null };
+      return null;
     }
   }));
 
-  const validIds = universeLookups.map((game) => game.universeId).filter((id) => id !== null);
-  if (!validIds.length) {
-    return {
-      players: 0,
-      games: placeIds.map((placeId) => ({ placeId, name: `Experience ${placeId}`, players: 0 })),
-    };
-  }
+  const validIds = universeIds.filter((id) => id !== null);
+  if (!validIds.length) return 0;
   const response = await fetch(`https://games.roblox.com/v1/games?universeIds=${validIds.join(",")}`);
   if (!response.ok) throw new Error("Roblox games API request failed");
   const data = await response.json();
-  const gamesByUniverse = new Map((data.data || []).map((game) => [game.id, game]));
-  const games = universeLookups.map(({ placeId, universeId }) => {
-    const game = universeId ? gamesByUniverse.get(universeId) : null;
-    return {
-      placeId,
-      name: game?.name || `Experience ${placeId}`,
-      players: Number(game?.playing) || 0,
-    };
-  });
-  return {
-    players: games.reduce((total, game) => total + game.players, 0),
-    games,
-  };
+  return (data.data || []).reduce((total, game) => total + (Number(game.playing) || 0), 0);
 }
 
 function normalizeHistory(history) {
   return (Array.isArray(history) ? history : []).map((entry) => {
-    const games = Array.isArray(entry.games)
-      ? entry.games.map((game) => ({
-          placeId: String(game.placeId),
-          name: String(game.name || `Experience ${game.placeId}`),
-          players: Number(game.players) || 0,
-        }))
-      : [];
-    if (entry.timestamp) return { timestamp: entry.timestamp, players: Number(entry.players) || 0, games };
-    if (entry.date) return { timestamp: `${entry.date}T00:00:00.000Z`, players: Number(entry.players) || 0, games };
+    if (entry.timestamp) return { timestamp: entry.timestamp, players: Number(entry.players) || 0 };
+    if (entry.date) return { timestamp: `${entry.date}T00:00:00.000Z`, players: Number(entry.players) || 0 };
     return null;
   }).filter(Boolean);
 }
@@ -100,10 +76,8 @@ export default async function handler(req, res) {
     const hour = `${new Date().toISOString().slice(0, 13)}:00:00.000Z`;
     const latest = history.at(-1);
 
-    if (!latest || latest.timestamp !== hour || !latest.games.length) {
-      const snapshot = { timestamp: hour, ...(await fetchGameStats(placeIds)) };
-      if (latest?.timestamp === hour) history[history.length - 1] = snapshot;
-      else history.push(snapshot);
+    if (!latest || latest.timestamp !== hour) {
+      history.push({ timestamp: hour, players: await fetchTotalPlayers(placeIds) });
       history = history.slice(-MAX_HOURS_STORED);
       await kvSet(HISTORY_KEY, history);
     }
