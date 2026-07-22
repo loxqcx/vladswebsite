@@ -201,7 +201,24 @@ function historyUrl() {
 
 function normalizeHistoryEntry(entry) {
   const timestamp = entry.timestamp || (entry.date ? `${entry.date}T00:00:00.000Z` : null);
-  return timestamp ? { timestamp, players: Number(entry.players) || 0 } : null;
+  if (!timestamp) return null;
+  const games = Array.isArray(entry.games) ? entry.games.map((game) => ({
+    placeId: String(game.placeId),
+    name: String(game.name || `Experience ${game.placeId}`),
+    players: Number(game.players) || 0,
+  })) : [];
+  return { timestamp, players: Number(entry.players) || 0, games };
+}
+
+const CHART_COLORS = ["#63e6ff", "#b7f36b", "#c89cff", "#ffae57", "#ff6b81", "#5f9dff", "#f4e66a"];
+
+function gameColor(placeId, fallbackIndex) {
+  const configIndex = GAMES.findIndex((game) => String(game.placeId) === String(placeId));
+  return CHART_COLORS[(configIndex >= 0 ? configIndex : fallbackIndex) % CHART_COLORS.length];
+}
+
+function displayGameName(game) {
+  return GAMES.find((configured) => String(configured.placeId) === String(game.placeId))?.name || game.name;
 }
 
 function formatChartTime(timestamp, includeDate = false) {
@@ -226,67 +243,98 @@ function smoothPath(points) {
   return `${path} L ${last.x} ${last.y}`;
 }
 
-function setupCcuTooltip(wrap, points, chartWidth, chartHeight) {
-  const svg = wrap.querySelector(".ccu-chart");
-  const tooltip = wrap.querySelector("[data-ccu-tooltip]");
-  if (!svg || !tooltip) return;
+function setupCcuTooltip(stage, timePoints, series, chartWidth) {
+  const svg = stage.querySelector(".ccu-chart");
+  const tooltip = stage.querySelector("[data-ccu-tooltip]");
+  const hoverLine = stage.querySelector(".ccu-chart__hover-line");
+  if (!svg || !tooltip || !hoverLine) return;
   svg.addEventListener("mousemove", (event) => {
     const rect = svg.getBoundingClientRect();
     const relativeX = (event.clientX - rect.left) / (rect.width / chartWidth);
-    const nearest = points.reduce((best, point) => Math.abs(point.x - relativeX) < Math.abs(best.x - relativeX) ? point : best, points[0]);
+    const nearest = timePoints.reduce((best, point) => Math.abs(point.x - relativeX) < Math.abs(best.x - relativeX) ? point : best, timePoints[0]);
+    const percent = (nearest.x / chartWidth) * 100;
     tooltip.style.opacity = "1";
-    tooltip.style.left = `${(nearest.x / chartWidth) * 100}%`;
-    tooltip.style.top = `${(nearest.y / chartHeight) * 100}%`;
-    tooltip.textContent = `${formatChartTime(nearest.timestamp, true)} \u00b7 ${formatNumber(nearest.players)} players`;
+    tooltip.style.left = `clamp(100px, ${percent}%, calc(100% - 100px))`;
+    tooltip.innerHTML = `<strong>${escapeHTML(formatChartTime(nearest.timestamp, true))}</strong>${series.map((game) => {
+      const point = game.points[nearest.index];
+      return `<span class="ccu-tooltip__row"><i class="ccu-tooltip__dot" style="--series-color:${game.color}"></i><span class="ccu-tooltip__name">${escapeHTML(game.name)}</span><span class="ccu-tooltip__value">${formatNumber(point.players)}</span></span>`;
+    }).join("")}`;
+    hoverLine.setAttribute("x1", nearest.x);
+    hoverLine.setAttribute("x2", nearest.x);
+    hoverLine.style.opacity = "1";
   });
-  svg.addEventListener("mouseleave", () => { tooltip.style.opacity = "0"; });
+  svg.addEventListener("mouseleave", () => {
+    tooltip.style.opacity = "0";
+    hoverLine.style.opacity = "0";
+  });
 }
 
 function renderCcuChart(wrap, history) {
   const width = 1000;
   const height = 390;
   const pad = { left: 58, right: 18, top: 24, bottom: 44 };
-  const values = history.map((entry) => entry.players);
-  const max = Math.max(...values, 1);
-  const min = Math.min(...values);
-  const chartMin = Math.max(0, min - Math.max(1, (max - min) * 0.18));
-  const range = max - chartMin || 1;
+  const chartHistory = history.filter((entry) => entry.games.length);
+  const latest = chartHistory.at(-1);
+  if (!latest) {
+    wrap.innerHTML = '<div class="ccu-chart-empty">Per-game history will appear after the next hourly snapshot.</div>';
+    return;
+  }
+
+  const topGames = latest.games.slice().sort((a, b) => b.players - a.players).slice(0, 5).map((game, index) => ({
+    ...game,
+    name: displayGameName(game),
+    color: gameColor(game.placeId, index),
+  }));
   const plotWidth = width - pad.left - pad.right;
   const plotHeight = height - pad.top - pad.bottom;
-  const points = history.map((entry, index) => ({
-    x: history.length === 1 ? pad.left + plotWidth / 2 : pad.left + (index / (history.length - 1)) * plotWidth,
-    y: pad.top + plotHeight - ((entry.players - chartMin) / range) * plotHeight,
-    ...entry,
+  const timePoints = chartHistory.map((entry, index) => ({
+    index,
+    timestamp: entry.timestamp,
+    x: chartHistory.length === 1 ? pad.left + plotWidth / 2 : pad.left + (index / (chartHistory.length - 1)) * plotWidth,
+  }));
+  const series = topGames.map((game) => ({
+    ...game,
+    points: chartHistory.map((entry, index) => {
+      const snapshot = entry.games.find((candidate) => String(candidate.placeId) === String(game.placeId));
+      return { x: timePoints[index].x, players: Number(snapshot?.players) || 0, timestamp: entry.timestamp };
+    }),
+  }));
+  const max = Math.max(...series.flatMap((game) => game.points.map((point) => point.players)), 1);
+  series.forEach((game) => game.points.forEach((point) => {
+    point.y = pad.top + plotHeight - (point.players / max) * plotHeight;
   }));
 
-  const linePath = smoothPath(points);
-  const areaPath = `${linePath} L ${points.at(-1).x} ${pad.top + plotHeight} L ${points[0].x} ${pad.top + plotHeight} Z`;
-  const labelStep = Math.max(1, Math.ceil(points.length / 6));
-  const labels = points.filter((_, index) => index % labelStep === 0 || index === points.length - 1).map((point, index, filtered) => {
+  const labelStep = Math.max(1, Math.ceil(timePoints.length / 6));
+  const labels = timePoints.filter((_, index) => index % labelStep === 0 || index === timePoints.length - 1).map((point, index, filtered) => {
     const showDate = index === 0 || index === filtered.length - 1 || new Date(point.timestamp).getHours() === 0;
     return `<text x="${point.x}" y="${height - 12}" class="ccu-chart__axis-label" text-anchor="middle">${formatChartTime(point.timestamp, showDate)}</text>`;
   }).join("");
   const grid = [0, .25, .5, .75, 1].map((step) => {
     const y = pad.top + plotHeight * step;
-    const value = Math.round(max - step * range);
+    const value = Math.round(max * (1 - step));
     return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" class="ccu-chart__grid"/><text x="${pad.left - 11}" y="${y + 4}" class="ccu-chart__axis-label" text-anchor="end">${formatNumber(value)}</text>`;
   }).join("");
 
-  wrap.innerHTML = `
-    <svg class="ccu-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="Hourly concurrent player history">
-      <defs><linearGradient id="ccuFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity=".22"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-      ${grid}<path d="${areaPath}" fill="url(#ccuFill)"/><path class="ccu-chart__line" d="${linePath}" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      ${points.map((point) => `<circle cx="${point.x}" cy="${point.y}" r="3.5" class="ccu-chart__dot"/>`).join("")}${labels}
-    </svg><div class="ccu-chart__tooltip" data-ccu-tooltip></div>`;
+  const legend = series.map((game) => `<span class="ccu-legend__item" style="--series-color:${game.color}"><i class="ccu-legend__swatch"></i><span class="ccu-legend__name">${escapeHTML(game.name)}</span><span class="ccu-legend__value">${formatNumber(game.players)}</span></span>`).join("");
+  const lines = series.map((game) => `<path class="ccu-chart__line" d="${smoothPath(game.points)}" fill="none" stroke="${game.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${game.points.map((point) => `<circle cx="${point.x}" cy="${point.y}" r="3.5" class="ccu-chart__dot${game.points.length === 1 ? " ccu-chart__dot--single" : ""}" stroke="${game.color}"/>`).join("")}`).join("");
 
-  const line = wrap.querySelector(".ccu-chart__line");
-  if (line && typeof line.getTotalLength === "function") {
+  wrap.innerHTML = `
+    <div class="ccu-legend" aria-label="Top five experiences">${legend}</div>
+    <div class="ccu-chart-stage">
+      <svg class="ccu-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="Hourly CCU for the latest top five experiences">
+        ${grid}${lines}<line y1="${pad.top}" y2="${pad.top + plotHeight}" class="ccu-chart__hover-line"/>${labels}
+      </svg>
+      <div class="ccu-chart__tooltip" data-ccu-tooltip></div>
+    </div>`;
+
+  wrap.querySelectorAll(".ccu-chart__line").forEach((line) => {
+    if (typeof line.getTotalLength !== "function") return;
     const length = line.getTotalLength();
     line.style.strokeDasharray = length;
     line.style.strokeDashoffset = length;
     requestAnimationFrame(() => { line.style.transition = "stroke-dashoffset 1.2s ease"; line.style.strokeDashoffset = "0"; });
-  }
-  setupCcuTooltip(wrap, points, width, height);
+  });
+  setupCcuTooltip(wrap.querySelector(".ccu-chart-stage"), timePoints, series, width);
 }
 
 function renderCcuStats(history) {
