@@ -88,5 +88,14 @@ const GAMES = [
     link: "https://www.roblox.com/games/91739789863159/Spell-or-Fall",
     ctaText: "Play Now",
     badge: "Featured"
+  },
+   {
+    name: "Secure the Prison",
+    description: "Secure the prision, dont fail!.",
+    image: "https://tr.rbxcdn.com/180DAY-486ee72e126a8dc3ddf10cd84a5ca660/768/432/Image/Webp/noFilter",
+    placeId: 130694958210373,
+    link: "https://www.roblox.com/games/130694958210373/Secure-the-Prison",
+    ctaText: "Play Now",
+    badge: "Featured"
   }
 ];
