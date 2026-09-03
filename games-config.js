@@ -97,5 +97,14 @@ const GAMES = [
     link: "https://www.roblox.com/games/130694958210373/Secure-the-Prison",
     ctaText: "Play Now",
     badge: "Featured"
+  },
+   {
+    name: "Merge a Dino",
+    description: " MERGE A DINO - Merge dinosaurs, build your army, raid EVERYONE.",
+    image: "https://tr.rbxcdn.com/180DAY-f8944b3ca785de3be1da62f3678fda58/768/432/Image/Webp/noFilter",
+    placeId: 84546345526935,
+    link: "https://www.roblox.com/games/84546345526935/Merge-a-Dino",
+    ctaText: "Play Now",
+    badge: "Featured"
   }
 ];
