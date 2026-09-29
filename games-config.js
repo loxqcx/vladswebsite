@@ -106,5 +106,23 @@ const GAMES = [
     link: "https://www.roblox.com/games/84546345526935/Merge-a-Dino",
     ctaText: "Play Now",
     badge: "Featured"
-  }
+  },
+  {
+    name: "Build Base to Survive DINOS",
+    description: " Build anything you want to survive the Dinosaurs!.",
+    image: "https://tr.rbxcdn.com/180DAY-a341cd3770f7231092099307685ee7b7/768/432/Image/Webp/noFilter",
+    placeId: 121261737752540,
+    link: "https://www.roblox.com/games/121261737752540/Build-Base-to-Survive-DINOS",
+    ctaText: "Play Now",
+    badge: "Featured"
+  },
+  {
+    name: "Steal a Dino Egg",
+    description: "  Steal eggs from dinosaurs!.",
+    image: "https://tr.rbxcdn.com/180DAY-571c2409286f029f0c4aa594b5b58d2d/768/432/Image/Webp/noFilter",
+    placeId: 74810549402614,
+    link: "https://www.roblox.com/games/74810549402614/Steal-a-Dino-Egg",
+    ctaText: "Play Now",
+    badge: "Featured"
+  },
 ];
