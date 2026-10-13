@@ -107,4 +107,13 @@ const GAMES = [
     ctaText: "Play Now",
     badge: "Featured"
   },
+  {
+    name: "Secure the Waterpark",
+    description: "Secure the waterpark from intruders.",
+    image: "https://tr.rbxcdn.com/180DAY-e3b30b30b55e8c867945448d66735d21/768/432/Image/Webp/noFilter",
+    placeId: 121338943285005,
+    link: "https://www.roblox.com/games/121338943285005/Secure-the-Waterpark",
+    ctaText: "Play Now",
+    badge: "Featured"
+  },
 ];
